@@ -152,7 +152,7 @@ export default function HomePage() {
 
       setImages(imagesObj);
     } else {
-      alert("No images found in the folder!");
+      alert("No images loaded!");
     }
   };
 
@@ -162,8 +162,11 @@ export default function HomePage() {
     }
   }, [images]);
 
-  console.log("images", images);
-  console.log("originalDataWithImages", originalDataWithImages);
+  useEffect(() => {
+    console.log("fileName", fileName);
+    console.log("originalDataWithImages", originalDataWithImages);
+    console.log("images", images);
+  }, [images, originalDataWithImages]);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -222,6 +225,7 @@ export default function HomePage() {
               /* directory="" */
               multiple
               onChange={handleFileSelection}
+              ref={fileInputRef}
               style={{ display: "none" }}
               id="file-input"
             />
@@ -232,14 +236,6 @@ export default function HomePage() {
                 📂 Select File Excel / Images
               </Button>
             </label>
-
-            {/*  <Button
-              variant="contained"
-              startIcon={<UploadFileIcon />}
-              onClick={() => fileInputRef.current.click()}
-            >
-              Upload Excel File
-            </Button> */}
 
             {/* Show Selected File Name */}
             <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
@@ -276,6 +272,7 @@ export default function HomePage() {
           <Grid2>
             {/* Drop Zone Images */}
             <Box
+              onClick={() => fileInputRef.current.click()}
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDropImages}
               sx={{
