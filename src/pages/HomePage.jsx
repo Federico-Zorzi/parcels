@@ -15,8 +15,6 @@ import {
   Divider,
 } from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
 
 export default function HomePage() {
   const defaultData = {
@@ -36,17 +34,21 @@ export default function HomePage() {
   const [fileName, setFileName] = useState("");
   const [originalData, setOriginalData] = useState([]);
   const [originalDataWithImages, setOriginalDataWithImages] = useState([]);
-  const [parcelSelected, setParcelSelected] = useState(0);
+  const [parcelSelected, setParcelSelected] = useState("");
 
   const fileInputRef = useRef(null);
 
   const [images, setImages] = useState([]);
 
   const convertImagesFromFileExcel = (excelData, arrayImages) => {
+    /* console.log("excelData", excelData);
+    console.log("arrayImages", arrayImages); */
+
     const imgConversion = excelData.map((data) => {
-      const findImgInFolder = arrayImages.find(
-        (image) =>
-          image.imagePath === data.images || image.imagePath === "default.svg"
+      let findImgInFolder = null;
+
+      findImgInFolder = arrayImages.find(
+        (image) => image.imagePath === data.images
       );
 
       if (findImgInFolder) {
@@ -54,7 +56,7 @@ export default function HomePage() {
       } else {
         return {
           ...data,
-          imagesUrl: "No images fouded, no URL",
+          imagesUrl: "/parcels/img/default.svg",
         };
       }
     });
@@ -178,11 +180,12 @@ export default function HomePage() {
       return;
     }
 
+    if (!open) setParcelSelected("");
     setDrawerOpen({ ...drawerOpen, [anchor]: open });
   };
 
   const drawerSection = (anchor, parcelData) => {
-    /*    console.log("parcelData", parcelData); */
+    /* console.log("parcelData", parcelData); */
     return (
       <Box
         sx={{ width: anchor === "top" || anchor === "bottom" ? "auto" : 400 }}
@@ -190,20 +193,18 @@ export default function HomePage() {
         onClick={toggleDrawer(anchor, false)}
         onKeyDown={toggleDrawer(anchor, false)}
       >
+        <Grid2 container sx={{ justifyContent: "center" }}>
+          <img
+            src={parcelData.imagesUrl}
+            alt="List Item Image"
+            style={{ width: 200, height: 150, borderRadius: "8px" }}
+          />
+        </Grid2>
         <List>
-          {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
+          <ListItem>
+            <ListItemText primary={parcelData.Parcel} />
+          </ListItem>
         </List>
-
-        <span>parcelData: {parcelData.Parcel}</span>
       </Box>
     );
   };
@@ -233,7 +234,9 @@ export default function HomePage() {
             {/* Upload Button */}
             <label htmlFor="file-input">
               <Button variant="contained" component="span">
-                📂 Select File Excel / Images
+                <UploadFileIcon />
+                {/*  */}
+                Select File Excel / Images
               </Button>
             </label>
 
