@@ -9,10 +9,8 @@ import {
   Drawer,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
-  ListItemButton,
-  Divider,
+  Paper,
 } from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 
@@ -35,10 +33,14 @@ export default function HomePage() {
   const [originalData, setOriginalData] = useState([]);
   const [originalDataWithImages, setOriginalDataWithImages] = useState([]);
   const [parcelSelected, setParcelSelected] = useState("");
-
   const fileInputRef = useRef(null);
-
   const [images, setImages] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const [numRows, setNumRows] = useState(0);
+  const [numCols, setNumCols] = useState(0);
+  const [totalBoxes, setTotalBoxes] = useState(0);
+  const [layout, setLayout] = useState([]);
 
   const convertImagesFromFileExcel = (excelData, arrayImages) => {
     /* console.log("excelData", excelData);
@@ -109,18 +111,35 @@ export default function HomePage() {
     reader.onload = (e) => {
       const binaryStr = e.target?.result;
       const workbook = XLSX.read(binaryStr, { type: "binary" });
-
       // Assuming the first sheet
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
       // Convert sheet to JSON
-      const parsedData = XLSX.utils.sheet_to_json(sheet);
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      convertImagesFromFileExcel(parsedData, images);
+      const maxRow = Math.max(...jsonData.map((item) => item.Row));
+      const maxCol = Math.max(...jsonData.map((item) => item.Column));
+      console.log("maxRow", maxRow);
+      console.log("maxCol", maxCol);
+      setNumRows(maxRow);
+      setNumCols(maxCol);
+      setTotalBoxes(maxRow * maxCol);
+
+      const newLayout = Array.from({ length: maxRow }, () =>
+        Array(maxCol).fill(null)
+      );
+
+      // Assign data to the layout
+      jsonData.forEach((item) => {
+        newLayout[item.Row - 1][item.Col - 1] = item.Plot_id; // Assuming rows and columns are 1-indexed in your data
+      });
+
+      setLayout(newLayout);
+
+      convertImagesFromFileExcel(jsonData, images);
 
       // Store data in state
-      setOriginalData(parsedData);
+      setOriginalData(jsonData);
     };
 
     reader.readAsBinaryString(file);
@@ -165,12 +184,11 @@ export default function HomePage() {
   }, [images]);
 
   useEffect(() => {
-    console.log("fileName", fileName);
+    /* console.log("fileName", fileName); */
+    /* console.log("originalData", originalData); */
     console.log("originalDataWithImages", originalDataWithImages);
-    console.log("images", images);
-  }, [images, originalDataWithImages]);
-
-  const [drawerOpen, setDrawerOpen] = useState(false);
+    /* console.log("images", images); */
+  }, [images, originalData]);
 
   const toggleDrawer = (anchor, open) => (event) => {
     if (
@@ -331,8 +349,8 @@ export default function HomePage() {
         )}
 
         <hr />
-
-        {
+        {/* LAYOUT CON DRAWER CREATO TEMPORANEAMENTE */}
+        {/* {
           <Grid2 container spacing={2} sx={{ my: 2 }}>
             {originalDataWithImages.map((data, index) => (
               <Grid2 key={index}>
@@ -364,7 +382,6 @@ export default function HomePage() {
             ))}
           </Grid2>
         }
-
         <Drawer
           anchor={"right"}
           open={drawerOpen["right"]}
@@ -374,7 +391,24 @@ export default function HomePage() {
             "right",
             originalDataWithImages[parcelSelected] || defaultData
           )}
-        </Drawer>
+        </Drawer> */}
+
+        {/* NEW LAYOUT */}
+        {layout.length > 0 && (
+          <div>
+            <table>
+              <tbody>
+                {layout.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {row.map((cell, colIndex) => (
+                      <td key={colIndex}>{cell || ""}</td> // Display cell data or leave it empty
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </main>
   );
