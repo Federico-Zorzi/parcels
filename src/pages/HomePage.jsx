@@ -342,7 +342,10 @@ export default function HomePage() {
                     width: 100,
                     height: 100,
                     borderRadius: 1,
-                    bgcolor: "primary.main",
+                    bgcolor:
+                      parcelSelected === index
+                        ? "secondary.main"
+                        : "primary.main",
                     "&:hover": {
                       bgcolor: "primary.dark",
                     },

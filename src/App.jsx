@@ -1,5 +1,5 @@
 /* import { useState } from "react"; */
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 
 import DefaultLayout from "./layouts/DefaultLayout";
 
@@ -10,18 +10,16 @@ import AboutUsPage from "./pages/AboutUsPage";
 
 function App() {
   return (
-    <>
-      <DataContextProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route Component={DefaultLayout}>
-              <Route index Component={HomePage} />
-              <Route path="/aboutUs" Component={AboutUsPage} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </DataContextProvider>
-    </>
+    <DataContextProvider>
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<DefaultLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="aboutUs" element={<AboutUsPage />} />
+          </Route>
+        </Routes>
+      </HashRouter>
+    </DataContextProvider>
   );
 }
 
