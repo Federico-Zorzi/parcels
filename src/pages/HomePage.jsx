@@ -3,7 +3,16 @@ import * as XLSX from "xlsx";
 
 import BoxData from "../components/BoxData";
 
-import { Typography, Button, Box, Grid2 } from "@mui/material";
+import {
+  Typography,
+  Button,
+  Box,
+  Grid2,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 
 export default function HomePage() {
@@ -14,6 +23,11 @@ export default function HomePage() {
   const fileInputRef = useRef(null);
   const [images, setImages] = useState([]);
 
+  const [fiBLIdFilterList, setFiBLIdFilterList] = React.useState([]);
+  const [FiBLIdFilter, setFiBLIdFilter] = React.useState("");
+
+  const filtersList = { FiBLIdFilter };
+
   const [numRows, setNumRows] = useState(0);
   const [numCols, setNumCols] = useState(0);
   const [matrixData, setMatrixData] = useState([]);
@@ -23,6 +37,10 @@ export default function HomePage() {
       Array.from({ length: cols }, () => defaultValue)
     );
   }
+
+  const handleChangeFilter = (event, setFilter) => {
+    setFilter(event.target.value);
+  };
 
   const handleFileSelection = (event) => {
     event.preventDefault();
@@ -78,10 +96,16 @@ export default function HomePage() {
 
       const maxRow = Math.max(...jsonData.map((item) => item.Row));
       const maxCol = Math.max(...jsonData.map((item) => item.Column));
-      /* console.log("data", jsonData); */
-      console.log("Max Row:", maxRow, "Max Col:", maxCol);
+      const fiBLId = [...new Set(jsonData.map((item) => item.FiBL_id))]
+        .filter((item) => item !== undefined)
+        .sort((a, b) => a - b);
+
+      console.log("fiBLId", fiBLId);
+      console.log("data", jsonData);
+      /* console.log("Max Row:", maxRow, "Max Col:", maxCol); */
       setNumRows(maxRow);
       setNumCols(maxCol);
+      setFiBLIdFilterList(fiBLId);
       let newMatrixLayout = createMatrix(maxRow, maxCol, 0);
 
       jsonData.forEach((data) => {
@@ -251,6 +275,28 @@ export default function HomePage() {
           </Grid2>
         </Grid2>
 
+        <div>
+          <FormControl sx={{ width: 200 }}>
+            <InputLabel id="filter-select-label">FiBL_id</InputLabel>
+            <Select
+              labelId="filter-select-label"
+              id="filter-select"
+              value={FiBLIdFilter}
+              label="FiBL_id"
+              onChange={(e) => handleChangeFilter(e, setFiBLIdFilter)}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {fiBLIdFilterList.map((item, index) => (
+                <MenuItem key={index} value={item}>
+                  {item}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </div>
+
         {/* Display uploaded data */}
         {/* {originalData.length > 0 && (
           <table
@@ -336,6 +382,7 @@ export default function HomePage() {
                                 matrixData={matrixData}
                                 rowIndex={rowIndex}
                                 colIndex={colIndex}
+                                filters={filtersList}
                               />
                             </Grid2>
                           </Grid2>
@@ -348,6 +395,7 @@ export default function HomePage() {
                             matrixData={matrixData}
                             rowIndex={rowIndex}
                             colIndex={colIndex}
+                            filters={filtersList}
                           />
                         </Grid2>
                       );

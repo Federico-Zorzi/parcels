@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, createTheme, ThemeProvider } from "@mui/material";
 
 import DrawerData from "./DrawerData";
 
-export default function BoxData({ matrixData, rowIndex, colIndex }) {
+export default function BoxData({ matrixData, rowIndex, colIndex, filters }) {
   const theme = createTheme({
     palette: {
       primary: { main: "#007FFF" },
@@ -11,11 +11,14 @@ export default function BoxData({ matrixData, rowIndex, colIndex }) {
       custom: {
         empty: "#EEEEEE",
         full: "#A5D6A7",
-        selected: "#FFE082",
-        hover: "#81C784",
+        selected: "#388E3C",
+        hover: "#388E3C",
+        filtered: "#FFE082",
       },
     },
   });
+
+  const { FiBLIdFilter } = filters;
 
   const [parcelCoordinatesSelected, setParcelCoordinatesSelected] =
     useState("");
@@ -47,7 +50,13 @@ export default function BoxData({ matrixData, rowIndex, colIndex }) {
             borderRadius: 1,
             bgcolor:
               matrixData[rowIndex] && matrixData[rowIndex][colIndex]
-                ? parcelCoordinatesSelected === `${rowIndex}-${colIndex}`
+                ? FiBLIdFilter
+                  ? FiBLIdFilter === matrixData[rowIndex][colIndex].FiBL_id
+                    ? theme.palette.custom.filtered
+                    : parcelCoordinatesSelected === `${rowIndex}-${colIndex}`
+                    ? theme.palette.custom.selected
+                    : theme.palette.custom.full
+                  : parcelCoordinatesSelected === `${rowIndex}-${colIndex}`
                   ? theme.palette.custom.selected
                   : theme.palette.custom.full
                 : theme.palette.custom.empty,
