@@ -15,20 +15,6 @@ import {
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 
 export default function HomePage() {
-  const defaultData = {
-    Parcel: "",
-    images: "",
-    imagesUrl: "",
-    try1: "",
-    try2: "",
-    try3: "",
-    try4: "",
-    try5: "",
-    try6: "",
-    try7: "",
-    try8: "",
-    try9: "",
-  };
   const [fileName, setFileName] = useState("");
   const [originalData, setOriginalData] = useState([]);
   const [originalDataWithImages, setOriginalDataWithImages] = useState([]);
@@ -39,31 +25,13 @@ export default function HomePage() {
 
   const [numRows, setNumRows] = useState(0);
   const [numCols, setNumCols] = useState(0);
-  const [totalBoxes, setTotalBoxes] = useState(0);
-  const [layout, setLayout] = useState([]);
+  const [matrixData, setMatrixData] = useState([]);
 
-  const convertImagesFromFileExcel = (excelData, arrayImages) => {
-    /* console.log("excelData", excelData);
-    console.log("arrayImages", arrayImages); */
-
-    const imgConversion = excelData.map((data) => {
-      let findImgInFolder = null;
-
-      findImgInFolder = arrayImages.find(
-        (image) => image.imagePath === data.images
-      );
-
-      if (findImgInFolder) {
-        return { ...data, imagesUrl: findImgInFolder.urlImage };
-      } else {
-        return {
-          ...data,
-          imagesUrl: "/parcels/img/default.svg",
-        };
-      }
-    });
-    setOriginalDataWithImages(imgConversion);
-  };
+  function createMatrix(rows, cols, defaultValue = null) {
+    return Array.from({ length: rows }, () =>
+      Array.from({ length: cols }, () => defaultValue)
+    );
+  }
 
   const handleFileSelection = (event) => {
     event.preventDefault();
@@ -119,22 +87,20 @@ export default function HomePage() {
 
       const maxRow = Math.max(...jsonData.map((item) => item.Row));
       const maxCol = Math.max(...jsonData.map((item) => item.Column));
-      console.log("maxRow", maxRow);
-      console.log("maxCol", maxCol);
+      /* console.log("data", jsonData); */
+      console.log("Max Row:", maxRow, "Max Col:", maxCol);
       setNumRows(maxRow);
       setNumCols(maxCol);
-      setTotalBoxes(maxRow * maxCol);
+      let newMatrixLayout = createMatrix(maxRow, maxCol, 0);
 
-      const newLayout = Array.from({ length: maxRow }, () =>
-        Array(maxCol).fill(null)
-      );
+      jsonData.forEach((data) => {
+        /* console.log(`Row: ${data.Row}, Column: ${data.Column}`); */
+        const row = Number(data.Row);
+        const col = Number(data.Column);
 
-      // Assign data to the layout
-      jsonData.forEach((item) => {
-        newLayout[item.Row - 1][item.Col - 1] = item.Plot_id; // Assuming rows and columns are 1-indexed in your data
+        newMatrixLayout[row - 1][col - 1] = data;
       });
-
-      setLayout(newLayout);
+      setMatrixData(newMatrixLayout);
 
       convertImagesFromFileExcel(jsonData, images);
 
@@ -183,12 +149,35 @@ export default function HomePage() {
     }
   }, [images]);
 
-  useEffect(() => {
+  const convertImagesFromFileExcel = (excelData, arrayImages) => {
+    /* console.log("excelData", excelData);
+    console.log("arrayImages", arrayImages); */
+
+    const imgConversion = excelData.map((data) => {
+      let findImgInFolder = null;
+
+      findImgInFolder = arrayImages.find(
+        (image) => image.imagePath === data.images
+      );
+
+      if (findImgInFolder) {
+        return { ...data, imagesUrl: findImgInFolder.urlImage };
+      } else {
+        return {
+          ...data,
+          imagesUrl: "/parcels/img/default.svg",
+        };
+      }
+    });
+    setOriginalDataWithImages(imgConversion);
+  };
+
+  /*   useEffect(() => {
     /* console.log("fileName", fileName); */
-    /* console.log("originalData", originalData); */
-    console.log("originalDataWithImages", originalDataWithImages);
-    /* console.log("images", images); */
-  }, [images, originalData]);
+  /* console.log("originalData", originalData); */
+  /* console.log("originalDataWithImages", originalDataWithImages); */
+  /* console.log("images", images); 
+  }, [images, originalData]); */
 
   const toggleDrawer = (anchor, open) => (event) => {
     if (
@@ -227,6 +216,8 @@ export default function HomePage() {
     );
   };
 
+  console.log("matrixData", matrixData);
+
   return (
     <main>
       <div className="container pt-3">
@@ -241,7 +232,6 @@ export default function HomePage() {
             {/* File Input */}
             <input
               type="file"
-              /* directory="" */
               multiple
               onChange={handleFileSelection}
               ref={fileInputRef}
@@ -394,21 +384,88 @@ export default function HomePage() {
         </Drawer> */}
 
         {/* NEW LAYOUT */}
-        {layout.length > 0 && (
+        {matrixData.length > 0 ? (
           <div>
-            <table>
-              <tbody>
-                {layout.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    {row.map((cell, colIndex) => (
-                      <td key={colIndex}>{cell || ""}</td> // Display cell data or leave it empty
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Column Numbers */}
+            <Grid2
+              container
+              spacing={2}
+              sx={{
+                my: 2,
+                display: "flex",
+                gridTemplateColumns: `repeat(${numCols + 1}, 1fr)`,
+              }}
+            >
+              {/* Empty space for row numbers */}
+              <Grid2 xs={1}></Grid2>
+              {/* Column Headers */}
+              {Array.from({ length: numCols }, (_, colIndex) => (
+                <Grid2 xs={1} key={`col-${colIndex}`}>
+                  <Typography align="center">{colIndex + 1}</Typography>
+                </Grid2>
+              ))}
+            </Grid2>
+
+            {/* Grid Layout with Row Numbers */}
+            <Grid2
+              container
+              spacing={2}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${numCols + 1}, 1fr)`,
+                gap: 2,
+              }}
+            >
+              {Array.from({ length: numRows }, (_, rowIndex) => (
+                <React.Fragment key={`row-${rowIndex}`}>
+                  {/* Row Number */}
+                  <Grid2
+                    xs={1}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="h6">{rowIndex + 1}</Typography>
+                  </Grid2>
+
+                  {/* Row Items */}
+                  {Array.from({ length: numCols }, (_, colIndex) => (
+                    <Grid2 xs={1} key={`${rowIndex}-${colIndex}`}>
+                      <Box
+                        sx={{
+                          width: 100,
+                          height: 100,
+                          borderRadius: 1,
+                          bgcolor:
+                            parcelSelected === `${rowIndex}-${colIndex}`
+                              ? "secondary.main"
+                              : "primary.main",
+                          "&:hover": {
+                            bgcolor: "primary.dark",
+                          },
+                          color: "white",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                        onClick={() =>
+                          setParcelSelected(`${rowIndex}-${colIndex}`)
+                        }
+                      >
+                        {/* Displaying data, assuming value has Plot_id */}
+                        {matrixData[rowIndex] && matrixData[rowIndex][colIndex]
+                          ? matrixData[rowIndex][colIndex].Plot_id
+                          : "Empty"}
+                      </Box>
+                    </Grid2>
+                  ))}
+                </React.Fragment>
+              ))}
+            </Grid2>
           </div>
-        )}
+        ) : null}
       </div>
     </main>
   );
