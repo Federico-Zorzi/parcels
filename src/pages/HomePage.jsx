@@ -1,27 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
 
-import {
-  Typography,
-  Button,
-  Box,
-  Grid2,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-} from "@mui/material";
+import BoxData from "../components/BoxData";
+
+import { Typography, Button, Box, Grid2 } from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 
 export default function HomePage() {
   const [fileName, setFileName] = useState("");
   const [originalData, setOriginalData] = useState([]);
   const [originalDataWithImages, setOriginalDataWithImages] = useState([]);
-  const [parcelSelected, setParcelSelected] = useState("");
+
   const fileInputRef = useRef(null);
   const [images, setImages] = useState([]);
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [numRows, setNumRows] = useState(0);
   const [numCols, setNumCols] = useState(0);
@@ -172,52 +163,6 @@ export default function HomePage() {
     setOriginalDataWithImages(imgConversion);
   };
 
-  /*   useEffect(() => {
-    /* console.log("fileName", fileName); */
-  /* console.log("originalData", originalData); */
-  /* console.log("originalDataWithImages", originalDataWithImages); */
-  /* console.log("images", images); 
-  }, [images, originalData]); */
-
-  const toggleDrawer = (anchor, open) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
-
-    if (!open) setParcelSelected("");
-    setDrawerOpen({ ...drawerOpen, [anchor]: open });
-  };
-
-  const drawerSection = (anchor, parcelData) => {
-    /* console.log("parcelData", parcelData); */
-    return (
-      <Box
-        sx={{ width: anchor === "top" || anchor === "bottom" ? "auto" : 400 }}
-        role="presentation"
-        onClick={toggleDrawer(anchor, false)}
-        onKeyDown={toggleDrawer(anchor, false)}
-      >
-        <Grid2 container sx={{ justifyContent: "center" }}>
-          <img
-            src={parcelData.imagesUrl}
-            alt="List Item Image"
-            style={{ width: 200, height: 150, borderRadius: "8px" }}
-          />
-        </Grid2>
-        <List>
-          <ListItem>
-            <ListItemText primary={parcelData.Parcel} />
-          </ListItem>
-        </List>
-      </Box>
-    );
-  };
-
-  console.log("matrixData", matrixData);
-
   return (
     <main>
       <div className="container pt-3">
@@ -307,7 +252,7 @@ export default function HomePage() {
         </Grid2>
 
         {/* Display uploaded data */}
-        {originalData.length > 0 && (
+        {/* {originalData.length > 0 && (
           <table
             border="1"
             style={{ marginTop: "20px", borderCollapse: "collapse" }}
@@ -336,76 +281,13 @@ export default function HomePage() {
               ))}
             </tbody>
           </table>
-        )}
+        )} */}
 
         <hr />
-        {/* LAYOUT CON DRAWER CREATO TEMPORANEAMENTE */}
-        {/* {
-          <Grid2 container spacing={2} sx={{ my: 2 }}>
-            {originalDataWithImages.map((data, index) => (
-              <Grid2 key={index}>
-                <Box
-                  onClick={(event) => {
-                    setParcelSelected(index);
-                    toggleDrawer("right", true)(event);
-                  }}
-                  sx={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 1,
-                    bgcolor:
-                      parcelSelected === index
-                        ? "secondary.main"
-                        : "primary.main",
-                    "&:hover": {
-                      bgcolor: "primary.dark",
-                    },
-                    color: "white",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {data.Parcel}
-                </Box>
-              </Grid2>
-            ))}
-          </Grid2>
-        }
-        <Drawer
-          anchor={"right"}
-          open={drawerOpen["right"]}
-          onClose={toggleDrawer("right", false)}
-        >
-          {drawerSection(
-            "right",
-            originalDataWithImages[parcelSelected] || defaultData
-          )}
-        </Drawer> */}
 
         {/* NEW LAYOUT */}
         {matrixData.length > 0 ? (
           <div>
-            {/* Column Numbers */}
-            <Grid2
-              container
-              spacing={2}
-              sx={{
-                my: 2,
-                display: "flex",
-                gridTemplateColumns: `repeat(${numCols + 1}, 1fr)`,
-              }}
-            >
-              {/* Empty space for row numbers */}
-              <Grid2 xs={1}></Grid2>
-              {/* Column Headers */}
-              {Array.from({ length: numCols }, (_, colIndex) => (
-                <Grid2 xs={1} key={`col-${colIndex}`}>
-                  <Typography align="center">{colIndex + 1}</Typography>
-                </Grid2>
-              ))}
-            </Grid2>
-
             {/* Grid Layout with Row Numbers */}
             <Grid2
               container
@@ -425,42 +307,52 @@ export default function HomePage() {
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
+                      alignSelf: "end",
+                      height: 100,
                     }}
                   >
-                    <Typography variant="h6">{rowIndex + 1}</Typography>
+                    <Typography sx={{ fontSize: "1.2rem" }}>
+                      {rowIndex + 1}
+                    </Typography>
                   </Grid2>
 
                   {/* Row Items */}
-                  {Array.from({ length: numCols }, (_, colIndex) => (
-                    <Grid2 xs={1} key={`${rowIndex}-${colIndex}`}>
-                      <Box
-                        sx={{
-                          width: 100,
-                          height: 100,
-                          borderRadius: 1,
-                          bgcolor:
-                            parcelSelected === `${rowIndex}-${colIndex}`
-                              ? "secondary.main"
-                              : "primary.main",
-                          "&:hover": {
-                            bgcolor: "primary.dark",
-                          },
-                          color: "white",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                        onClick={() =>
-                          setParcelSelected(`${rowIndex}-${colIndex}`)
-                        }
-                      >
-                        {/* Displaying data, assuming value has Plot_id */}
-                        {matrixData[rowIndex] && matrixData[rowIndex][colIndex]
-                          ? matrixData[rowIndex][colIndex].Plot_id
-                          : "Empty"}
-                      </Box>
-                    </Grid2>
-                  ))}
+                  {Array.from({ length: numCols }, (_, colIndex) => {
+                    if (rowIndex === 0) {
+                      return (
+                        <Grid2 xs={1} key={`${rowIndex}-${colIndex}`}>
+                          <Grid2
+                            container
+                            spacing={2}
+                            sx={{ flexDirection: "column" }}
+                          >
+                            <Grid2
+                              sx={{ textAlign: "center", fontSize: "1.2rem" }}
+                            >
+                              {colIndex + 1}
+                            </Grid2>{" "}
+                            <Grid2>
+                              <BoxData
+                                matrixData={matrixData}
+                                rowIndex={rowIndex}
+                                colIndex={colIndex}
+                              />
+                            </Grid2>
+                          </Grid2>
+                        </Grid2>
+                      );
+                    } else {
+                      return (
+                        <Grid2 xs={1} key={`${rowIndex}-${colIndex}`}>
+                          <BoxData
+                            matrixData={matrixData}
+                            rowIndex={rowIndex}
+                            colIndex={colIndex}
+                          />
+                        </Grid2>
+                      );
+                    }
+                  })}
                 </React.Fragment>
               ))}
             </Grid2>
