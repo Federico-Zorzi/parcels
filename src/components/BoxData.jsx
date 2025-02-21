@@ -40,6 +40,26 @@ export default function BoxData({ matrixData, rowIndex, colIndex, filters }) {
     setDrawerOpen({ ...drawerOpen, [anchor]: open });
   };
 
+  const customizeBoxDesign = () => {
+    if (matrixData[rowIndex] && matrixData[rowIndex][colIndex]) {
+      if (FiBLIdFilter) {
+        if (FiBLIdFilter === matrixData[rowIndex][colIndex].FiBL_id) {
+          return theme.palette.custom.filtered;
+        } else if (parcelCoordinatesSelected === `${rowIndex}-${colIndex}`) {
+          return theme.palette.custom.selected;
+        } else {
+          return theme.palette.custom.full;
+        }
+      } else {
+        if (parcelCoordinatesSelected === `${rowIndex}-${colIndex}`) {
+          return theme.palette.custom.selected;
+        } else {
+          return theme.palette.custom.full;
+        }
+      }
+    } else return theme.palette.custom.empty;
+  };
+
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -48,18 +68,7 @@ export default function BoxData({ matrixData, rowIndex, colIndex, filters }) {
             width: "100%",
             height: 100,
             borderRadius: 1,
-            bgcolor:
-              matrixData[rowIndex] && matrixData[rowIndex][colIndex]
-                ? FiBLIdFilter
-                  ? FiBLIdFilter === matrixData[rowIndex][colIndex].FiBL_id
-                    ? theme.palette.custom.filtered
-                    : parcelCoordinatesSelected === `${rowIndex}-${colIndex}`
-                    ? theme.palette.custom.selected
-                    : theme.palette.custom.full
-                  : parcelCoordinatesSelected === `${rowIndex}-${colIndex}`
-                  ? theme.palette.custom.selected
-                  : theme.palette.custom.full
-                : theme.palette.custom.empty,
+            bgcolor: customizeBoxDesign,
             "&:hover": {
               bgcolor:
                 matrixData[rowIndex] && matrixData[rowIndex][colIndex]
