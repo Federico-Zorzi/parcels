@@ -43,9 +43,6 @@ export default function HomePage() {
   const [layout, setLayout] = useState([]);
 
   const convertImagesFromFileExcel = (excelData, arrayImages) => {
-    /* console.log("excelData", excelData);
-    console.log("arrayImages", arrayImages); */
-
     const imgConversion = excelData.map((data) => {
       let findImgInFolder = null;
 
